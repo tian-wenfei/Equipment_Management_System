@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据分析 - 茯忆长安</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2d5a3d;
+            --primary-light: #4a7c5c;
+            --secondary: #8b6914;
+            --accent: #c4a35a;
+            --bg-cream: #f5f0e6;
+            --bg-warm: #ebe3d5;
+            --text-dark: #2c2416;
+            --text-muted: #6b5d4d;
+            --success: #4a7c5c;
+            --warning: #c4a35a;
+            --danger: #a65d57;
+            --card-bg: #fffdf8;
+            --shadow: 0 4px 24px rgba(44, 36, 22, 0.08);
+            --shadow-hover: 0 8px 32px rgba(44, 36, 22, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', 'Noto Serif SC', sans-serif;
+            background: var(--bg-cream);
+            color: var(--text-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, var(--primary) 0%, #1e3d29 100%);
+            padding: 32px 24px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 48px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-text {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+        }
+
+        .logo-text span {
+            display: block;
+            font-size: 12px;
+            font-weight: 400;
+            opacity: 0.7;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .nav-icon {
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .sidebar-footer {
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .user-details {
+            color: #fff;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        .logout-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin-top: 16px;
+            background: rgba(166, 93, 87, 0.15);
+            border: none;
+            border-radius: 10px;
+            color: var(--danger);
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(166, 93, 87, 0.25);
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 32px 40px;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            animation: fadeInUp 0.6s ease backwards;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(45, 90, 61, 0.3);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .date-filter {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .date-input {
+            padding: 10px 14px;
+            border: 2px solid rgba(45, 90, 61, 0.15);
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--bg-cream);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .date-input:focus {
+            border-color: var(--primary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+        }
+
+        .stat-card.warning::before { background: var(--warning); }
+        .stat-card.success::before { background: var(--success); }
+        .stat-card.danger::before { background: var(--danger); }
+
+        .stat-value {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .stat-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-top: 8px;
+        }
+
+        .stat-trend.up {
+            background: rgba(74, 124, 92, 0.1);
+            color: var(--success);
+        }
+
+        .stat-trend.down {
+            background: rgba(166, 93, 87, 0.1);
+            color: var(--danger);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-container {
+            height: 320px;
+            position: relative;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 16px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .bar-chart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .bar-label {
+            width: 80px;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 24px;
+            background: var(--bg-cream);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            padding-left: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .bar-fill.primary {
+            background: linear-gradient(90deg, var(--primary-light), var(--primary));
+        }
+
+        .bar-fill.warning {
+            background: linear-gradient(90deg, #d4b76a, var(--secondary));
+        }
+
+        .bar-fill.success {
+            background: linear-gradient(90deg, #6a9c7c, var(--success));
+        }
+
+        .bar-fill.danger {
+            background: linear-gradient(90deg, #c27a74, var(--danger));
+        }
+
+        .bar-value {
+            width: 60px;
+            text-align: right;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid rgba(45, 90, 61, 0.1);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid rgba(45, 90, 61, 0.08);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--bg-cream);
+        }
+
+        .data-table tr:hover td {
+            background: var(--bg-cream);
+        }
+
+        .progress-ring {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-bg {
+            fill: none;
+            stroke: rgba(45, 90, 61, 0.1);
+            stroke-width: 8;
+        }
+
+        .progress-ring-fill {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .progress-ring-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .summary-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .summary-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 16px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .summary-icon.primary {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            color: #fff;
+        }
+
+        .summary-icon.warning {
+            background: linear-gradient(135deg, #d4b76a, var(--secondary));
+            color: #fff;
+        }
+
+        .summary-icon.success {
+            background: linear-gradient(135deg, #6a9c7c, var(--success));
+            color: #fff;
+        }
+
+        .summary-title {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 80px;
+                padding: 24px 12px;
+            }
+
+            .logo-text, .nav-link span, .sidebar-footer .user-details, .logout-btn span:not(.nav-icon) {
+                display: none;
+            }
+
+            .logo {
+                justify-content: center;
+            }
+
+            .nav-link {
+                justify-content: center;
+                padding: 14px;
+            }
+
+            .user-info {
+                justify-content: center;
+            }
+
+            .logout-btn {
+                justify-content: center;
+                padding: 12px;
+            }
+
+            .main-content {
+                margin-left: 80px;
+                padding: 24px;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">
+                <img src="logo.png" alt="Logo">
+            </div>
+            <div class="logo-text">
+                智能发花
+                <span>管理系统</span>
+            </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                    <span class="nav-icon">📊</span>
+                    <span>监控面板</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="equipment.html" class="nav-link">
+                    <span class="nav-icon">⚙️</span>
+                    <span>设备管理</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="analytics.html" class="nav-link active">
+                    <span class="nav-icon">📈</span>
+                    <span>数据分析</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="alerts.html" class="nav-link">
+                    <span class="nav-icon">🔔</span>
+                    <span>报警记录</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="history.html" class="nav-link">
+                    <span class="nav-icon">📋</span>
+                    <span>历史数据</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="settings.html" class="nav-link">
+                    <span class="nav-icon">👤</span>
+                    <span>用户设置</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">👨‍🌾</div>
+                <div class="user-details">
+                    <div class="user-name">朱晨雨</div>
+                    <div class="user-role">系统管理员</div>
+                </div>
+            </div>
+            <button class="logout-btn" id="logoutBtn">
+                <span class="nav-icon">🚪</span>
+                <span>退出登录</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1 class="page-title">数据分析</h1>
+            <p class="page-subtitle">深入分析生产数据，优化发花工艺参数</p>
+        </header>
+
+        <div class="date-filter">
+            <label style="font-size: 14px; font-weight: 600;">选择日期范围:</label>
+            <input type="date" class="date-input" value="2024-01-01">
+            <span>至</span>
+            <input type="date" class="date-input" value="2024-01-22">
+            <button class="btn btn-primary">查询</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">12,840</div>
+                <div class="stat-label">总产量 (kg)</div>
+                <span class="stat-trend up">↑ 12.5%</span>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-value">98.5%</div>
+                <div class="stat-label">平均良品率</div>
+                <span class="stat-trend up">↑ 2.3%</span>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-value">1,248</div>
+                <div class="stat-label">运行时长 (h)</div>
+                <span class="stat-trend up">↑ 8.7%</span>
+            </div>
+            <div class="stat-card danger">
+                <div class="stat-value">15</div>
+                <div class="stat-label">报警次数</div>
+                <span class="stat-trend down">↓ 33%</span>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="card" style="animation-delay: 0.1s;">
+                <div class="card-header">
+                    <h2 class="card-title">产量趋势分析</h2>
+                    <div class="card-actions" style="display: flex; gap: 8px;">
+                        <button class="btn btn-outline">日视图</button>
+                        <button class="btn btn-primary">周视图</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="productionChart" class="chart-canvas"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: var(--primary);"></span>
+                        实际产量
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background: var(--accent);"></span>
+                        目标产量
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="animation-delay: 0.2s;">
+                <div class="card-header">
+                    <h2 class="card-title">设备效率排名</h2>
+                </div>
+                <div class="bar-chart-container">
+                    <div class="bar-item">
+                        <span class="bar-label">HF-001</span>
+                        <div class="bar-track">
+                            <div class="bar-fill primary" style="width: 95%;">95%</div>
+                        </div>
+                        <span class="bar-value">95%</span>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">HF-002</span>
+                        <div class="bar-track">
+                            <div class="bar-fill success" style="width: 88%;">88%</div>
+                        </div>
+                        <span class="bar-value">88%</span>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">HF-003</span>
+                        <div class="bar-track">
+                            <div class="bar-fill warning" style="width: 76%;">76%</div>
+                        </div>
+                        <span class="bar-value">76%</span>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">HF-004</span>
+                        <div class="bar-track">
+                            <div class="bar-fill danger" style="width: 62%;">62%</div>
+                        </div>
+                        <span class="bar-value">62%</span>
+                    </div>
+                    <div class="bar-item">
+                        <span class="bar-label">HF-005</span>
+                        <div class="bar-track">
+                            <div class="bar-fill primary" style="width: 91%;">91%</div>
+                        </div>
+                        <span class="bar-value">91%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="animation-delay: 0.3s;">
+            <div class="card-header">
+                <h2 class="card-title">工艺参数分析</h2>
+            </div>
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-icon primary">🌡️</div>
+                    <div class="summary-title">平均温度控制</div>
+                    <div class="summary-value">32.1°C</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">目标: 32°C</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon warning">💧</div>
+                    <div class="summary-title">平均湿度控制</div>
+                    <div class="summary-value">79.8%</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">目标: 80%</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon success">⏱️</div>
+                    <div class="summary-title">平均发花周期</div>
+                    <div class="summary-value">48.5h</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">目标: 48h</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="card" style="animation-delay: 0.4s;">
+                <div class="card-header">
+                    <h2 class="card-title">良品率统计</h2>
+                </div>
+                <div style="display: flex; justify-content: space-around; padding: 20px 0;">
+                    <div class="progress-ring">
+                        <svg width="80" height="80" viewBox="0 0 80 80">
+                            <circle class="progress-ring-bg" cx="40" cy="40" r="36"/>
+                            <circle class="progress-ring-fill" cx="40" cy="40" r="36" stroke="var(--success)" stroke-dasharray="226" stroke-dashoffset="3"/>
+                        </svg>
+                        <div class="progress-ring-value">98.5%</div>
+                    </div>
+                    <div style="flex: 1; padding-left: 32px;">
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 14px; color: var(--text-muted);">发花完成</div>
+                            <div style="font-family: 'Noto Serif SC', serif; font-size: 28px; font-weight: 700;">12,650 kg</div>
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 14px; color: var(--text-muted);">待复检</div>
+                            <div style="font-family: 'Noto Serif SC', serif; font-size: 28px; font-weight: 700;">190 kg</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 14px; color: var(--text-muted);">不合格</div>
+                            <div style="font-family: 'Noto Serif SC', serif; font-size: 28px; font-weight: 700;">0 kg</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="animation-delay: 0.5s;">
+                <div class="card-header">
+                    <h2 class="card-title">能耗分析</h2>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>设备</th>
+                                <th>用电量</th>
+                                <th>用水量</th>
+                                <th>能耗效率</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>HF-001</strong></td>
+                                <td>1,240 kWh</td>
+                                <td>248 m³</td>
+                                <td><span style="color: var(--success); font-weight: 600;">优秀</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>HF-002</strong></td>
+                                <td>1,180 kWh</td>
+                                <td>236 m³</td>
+                                <td><span style="color: var(--success); font-weight: 600;">优秀</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>HF-003</strong></td>
+                                <td>960 kWh</td>
+                                <td>192 m³</td>
+                                <td><span style="color: var(--warning); font-weight: 600;">良好</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>HF-004</strong></td>
+                                <td>1,320 kWh</td>
+                                <td>264 m³</td>
+                                <td><span style="color: var(--danger); font-weight: 600;">需优化</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function drawProductionChart() {
+            const canvas = document.getElementById('productionChart');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+
+            canvas.width = canvas.offsetWidth * dpr;
+            canvas.height = canvas.offsetHeight * dpr;
+            ctx.scale(dpr, dpr);
+
+            const width = canvas.offsetWidth;
+            const height = canvas.offsetHeight;
+            const padding = { top: 20, right: 30, bottom: 40, left: 50 };
+
+            ctx.clearRect(0, 0, width, height);
+
+            const gridColor = 'rgba(45, 90, 61, 0.08)';
+            const textColor = '#6b5d4d';
+            const fontSize = 11;
+
+            ctx.strokeStyle = gridColor;
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = padding.top + (height - padding.top - padding.bottom) * i / 5;
+                ctx.beginPath();
+                ctx.moveTo(padding.left, y);
+                ctx.lineTo(width - padding.right, y);
+                ctx.stroke();
+
+                ctx.fillStyle = textColor;
+                ctx.font = `${fontSize}px Source Sans 3`;
+                ctx.textAlign = 'right';
+                const value = 0 + (1500 - 0) * (5 - i) / 5;
+                ctx.fillText(value.toString(), padding.left - 10, y + 4);
+            }
+
+            const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+            ctx.textAlign = 'center';
+            const chartWidth = width - padding.left - padding.right;
+            weekDays.forEach((label, i) => {
+                const x = padding.left + chartWidth * i / (weekDays.length - 1);
+                ctx.fillText(label, x, height - padding.bottom + 20);
+            });
+
+            const actualData = [800, 1050, 980, 1120, 1080, 1200, 1150];
+            const targetData = [900, 900, 900, 1000, 1000, 1100, 1100];
+
+            function drawLine(data, color, lineWidth = 3) {
+                ctx.beginPath();
+                ctx.strokeStyle = color;
+                ctx.lineWidth = lineWidth;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                const chartHeight = height - padding.top - padding.bottom;
+                const maxVal = 1500;
+
+                data.forEach((value, i) => {
+                    const x = padding.left + chartWidth * i / (data.length - 1);
+                    const y = padding.top + chartHeight * (1 - value / maxVal);
+
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                ctx.stroke();
+
+                ctx.fillStyle = color;
+                data.forEach((value, i) => {
+                    const x = padding.left + chartWidth * i / (data.length - 1);
+                    const y = padding.top + chartHeight * (1 - value / maxVal);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+
+            drawLine(actualData, '#2d5a3d');
+            drawLine(targetData, '#c4a35a', 2);
+        }
+
+        drawProductionChart();
+        window.addEventListener('resize', drawProductionChart);
+    </script>
+</body>
+</html>
